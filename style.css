@@ -1,0 +1,48 @@
+body {
+  font-family: 'Lato', sans-serif;
+}
+
+.sidenav {
+  height: 100%;
+  width: 300px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  box-shadow: 10px 0 5px -2px rgb(135, 135, 135, 0.5);
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.sidenav .sidenav-item {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 18px;
+  color: #818181;
+  display: block;
+}
+
+.sidenav .sidenav-title {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 30px;
+  color: gray;
+  font-weight: bold;
+  display: block;
+}
+
+.sidenav .sidenav-item:hover {
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+}
+
+.main {
+  margin-left: 300px; /* Same as the width of the sidenav */
+  /*font-size: 28px; /* Increased text to enable scrolling */
+  padding: 0px 20px;
+}
+
+@media screen and (max-width: 450px) {
+  /* Make a hamburger for mobile */
+}
