@@ -2,7 +2,7 @@ body {
   font-family: 'Lato', sans-serif;
 }
 
-.sidenav {
+.custom-sidenav {
   height: 100%;
   width: 300px;
   position: fixed;
@@ -15,7 +15,7 @@ body {
   padding-top: 20px;
 }
 
-.sidenav .sidenav-item {
+.custom-sidenav .sidenav-item {
   padding: 6px 8px 6px 16px;
   text-decoration: none;
   font-size: 18px;
@@ -23,7 +23,7 @@ body {
   display: block;
 }
 
-.sidenav .sidenav-title {
+.custom-sidenav .sidenav-title {
   padding: 6px 8px 6px 16px;
   text-decoration: none;
   font-size: 30px;
@@ -32,7 +32,7 @@ body {
   display: block;
 }
 
-.sidenav .sidenav-item:hover {
+.custom-sidenav .sidenav-item:hover {
   color: rgb(0, 0, 0);
   cursor: pointer;
 }
@@ -41,6 +41,32 @@ body {
   margin-left: 300px; /* Same as the width of the sidenav */
   /*font-size: 28px; /* Increased text to enable scrolling */
   padding: 0px 20px;
+}
+
+#chart,
+#data {
+  margin: 2rem;
+}
+
+#chart svg {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 1rem;
+}
+
+.bar {
+  fill: green;
+}
+
+.label {
+  fill: darkred;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.dragging {
+  opacity: 0.5;
 }
 
 @media screen and (max-width: 450px) {

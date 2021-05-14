@@ -6,19 +6,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
 
-    <script src="script.js" defer></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
+      crossorigin="anonymous"
+    />
+
+    <script src="https://d3js.org/d3.v6.min.js" defer></script>
+    <script src="https://d3js.org/d3-scale.v3.min.js" defer></script>
+    <script src="https://d3js.org/d3-axis.v2.min.js" defer></script>
+
+    <script src="script.js" type="module" defer></script>
     <title>D3 Dashboard</title>
   </head>
   <body>
-    <div class="sidenav">
+    <div class="custom-sidenav custom-container">
       <span class="sidenav-title">Covid-19 tracker</span>
       <hr />
-      <span class="sidenav-item">Services</span>
-      <span class="sidenav-item">Clients</span>
-      <span class="sidenav-item">Contact</span>
+      <span id="total-global" class="sidenav-item">Total confirmed global</span>
+      <hr />
+      <span id="deaths-country" class="sidenav-item draggable" draggable="true"
+        >Deaths by country</span
+      >
+      <span id="cases-country" class="sidenav-item draggable" draggable="true"
+        >Cases by country</span
+      >
+      <span
+        id="recovered-country"
+        class="sidenav-item draggable"
+        draggable="true"
+        >Recovered by country</span
+      >
+      <hr />
+      <span
+        id="new-deaths-country"
+        class="sidenav-item draggable"
+        draggable="true"
+        >New deaths by country</span
+      >
+      <span
+        id="new-cases-country"
+        class="sidenav-item draggable"
+        draggable="true"
+        >New cases by country</span
+      >
+      <span
+        id="new-recovered-country"
+        class="sidenav-item draggable"
+        draggable="true"
+        >New recovered by country</span
+      >
     </div>
-    <div class="main">
-      <h2>hello</h2>
+    <div class="main custom-container">
+      <div id="chart" class="row">
+        <svg id="svgChart" class="col-md-auto"></svg>
+      </div>
+      <div id="data">
+        <ul></ul>
+      </div>
     </div>
   </body>
 </html>
