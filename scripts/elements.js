@@ -10,4 +10,4 @@ export const elNewRecoveredCountry = document.querySelector(
   '#new-recovered-country'
 );
 
-export const svgChart = document.querySelector('#svgChart');
+export const chartContainer = document.querySelector('#chart');
