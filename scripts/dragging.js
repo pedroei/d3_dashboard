@@ -1,4 +1,4 @@
-import { testingD3 } from './d3Functions.js';
+import { createChart } from './d3Functions.js';
 
 const fieldsToUseInChart = {
   NEW_CONFIRMED: 'NewConfirmed',
@@ -30,23 +30,95 @@ export const addDraggingEvents = (allCountries) => {
   container.addEventListener('drop', (e) => {
     e.preventDefault();
     const draggable = document.querySelector('.dragging');
+    let sizesXY = [1000, 600];
+
+    const items = document.querySelectorAll('.item');
+
+    if (items.length > 0) {
+      items.forEach((item) => {
+        item.style.width = '510px';
+        item.style.height = '400px';
+
+        const svg = item.children[0].children[0];
+
+        createChart(allCountries, null, 510, 400, svg);
+      });
+      grid.refreshItems();
+      sizesXY = [510, 400];
+    }
+
+    if (items.length > 1) {
+      items.forEach((item) => {
+        item.style.width = '450px';
+        item.style.height = '300px';
+
+        const svg = item.children[0].children[0];
+
+        createChart(allCountries, null, 450, 300, svg);
+      });
+      grid.refreshItems();
+      sizesXY = [450, 300];
+    }
+    if (items.length > 3) {
+      items.forEach((item) => {
+        item.style.width = '300px';
+        item.style.height = '200px';
+
+        const svg = item.children[0].children[0];
+
+        createChart(allCountries, null, 300, 200, svg);
+      });
+      grid.refreshItems();
+      sizesXY = [300, 200];
+    }
+
     if (draggable.id == 'deaths-country') {
-      testingD3(allCountries, fieldsToUseInChart.TOTAL_DEATHS, 450, 300);
+      createChart(
+        allCountries,
+        fieldsToUseInChart.TOTAL_DEATHS,
+        sizesXY[0],
+        sizesXY[1]
+      );
     }
     if (draggable.id == 'cases-country') {
-      testingD3(allCountries, fieldsToUseInChart.TOTAL_CONFIRMED, 450, 300);
+      createChart(
+        allCountries,
+        fieldsToUseInChart.TOTAL_CONFIRMED,
+        sizesXY[0],
+        sizesXY[1]
+      );
     }
     if (draggable.id == 'recovered-country') {
-      testingD3(allCountries, fieldsToUseInChart.TOTAL_RECOVERED, 450, 300);
+      createChart(
+        allCountries,
+        fieldsToUseInChart.TOTAL_RECOVERED,
+        sizesXY[0],
+        sizesXY[1]
+      );
     }
     if (draggable.id == 'new-deaths-country') {
-      testingD3(allCountries, fieldsToUseInChart.NEW_DEATHS, 450, 300);
+      createChart(
+        allCountries,
+        fieldsToUseInChart.NEW_DEATHS,
+        sizesXY[0],
+        sizesXY[1]
+      );
     }
     if (draggable.id == 'new-cases-country') {
-      testingD3(allCountries, fieldsToUseInChart.NEW_CONFIRMED, 450, 300);
+      createChart(
+        allCountries,
+        fieldsToUseInChart.NEW_CONFIRMED,
+        sizesXY[0],
+        sizesXY[1]
+      );
     }
     if (draggable.id == 'new-recovered-country') {
-      testingD3(allCountries, fieldsToUseInChart.NEW_RECOVERED, 450, 300);
+      createChart(
+        allCountries,
+        fieldsToUseInChart.NEW_RECOVERED,
+        sizesXY[0],
+        sizesXY[1]
+      );
     }
   });
 };

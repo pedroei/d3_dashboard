@@ -100,6 +100,13 @@ body {
   height: 100%;
 }
 
-@media screen and (max-width: 450px) {
-  /* Make a hamburger for mobile */
+@media screen and (max-width: 885px) {
+  .custom-sidenav {
+    display: none;
+  }
+
+  .main {
+    height: 100%;
+    padding: 0px 20px;
+  }
 }

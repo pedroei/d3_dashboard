@@ -19,4 +19,5 @@ const fetchData = async () => {
 fetchData();
 
 //TODO: Add double click on chart to delete
-//TODO: Put charts smaller to see the grid updating when resizing the window
+//TODO: Responsive
+//TODO: Styles

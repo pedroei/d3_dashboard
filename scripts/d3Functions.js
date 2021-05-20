@@ -1,16 +1,33 @@
 import { chartContainer } from './elements.js';
 //D3
-export const testingD3 = (countries, fieldReceived, width, height) => {
+export const createChart = (countries, fieldReceived, width, height, svg) => {
+  let fieldToUse;
+  if (fieldReceived) fieldToUse = fieldReceived;
+
+  let content;
+  if (svg) {
+    fieldToUse = svg.classList[0];
+    content = svg.parentNode;
+    svg.remove();
+  }
   const MARGINS = { top: 20, bottom: 10 };
   const CHART_WIDTH = width;
   const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
 
   const AUGMENTED_SCALE = 10000000;
 
-  const svgID = createSVG(
-    CHART_WIDTH,
-    CHART_HEIGHT + MARGINS.top + MARGINS.bottom
-  );
+  let svgID;
+  if (!svg) {
+    svgID = createSVG(
+      CHART_WIDTH,
+      CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
+      fieldToUse
+    );
+  } else {
+    svgID = createSVGWidthContent(content, fieldToUse);
+  }
+
+  //addRemoveEvent(svgID);
 
   const x = d3.scaleBand().rangeRound([0, CHART_WIDTH]).padding(0.1);
   const y = d3.scaleLinear().range([CHART_HEIGHT, 0]);
@@ -23,7 +40,7 @@ export const testingD3 = (countries, fieldReceived, width, height) => {
   x.domain(countries.map((c) => c.CountryCode));
   y.domain([
     0,
-    d3.max(countries, (c) => chooseField(c, fieldReceived)) + AUGMENTED_SCALE,
+    d3.max(countries, (c) => chooseField(c, fieldToUse)) + AUGMENTED_SCALE,
   ]); //Space to see above
 
   const chart = chartContainer.append('g');
@@ -41,26 +58,23 @@ export const testingD3 = (countries, fieldReceived, width, height) => {
     .append('rect')
     .classed('bar', true)
     .attr('width', x.bandwidth())
-    .attr(
-      'height',
-      (data) => CHART_HEIGHT - y(chooseField(data, fieldReceived))
-    )
+    .attr('height', (data) => CHART_HEIGHT - y(chooseField(data, fieldToUse)))
     .attr('x', (data) => x(data.CountryCode))
-    .attr('y', (data) => y(chooseField(data, fieldReceived)));
+    .attr('y', (data) => y(chooseField(data, fieldToUse)));
 
   chart
     .selectAll('.label')
     .data(countries)
     .enter()
     .append('text')
-    .text((data) => chooseField(data, fieldReceived))
+    .text((data) => chooseField(data, fieldToUse))
     .attr('x', (data) => x(data.CountryCode) + x.bandwidth() / 2)
-    .attr('y', (data) => y(chooseField(data, fieldReceived)) - 20)
+    .attr('y', (data) => y(chooseField(data, fieldToUse)) - 20)
     .attr('text-anchor', 'middle')
     .classed('label', true);
 };
 
-const createSVG = (WIDTH, HEIGHT) => {
+const createSVG = (WIDTH, HEIGHT, fieldReceived) => {
   //svg is in a different namespace
   const svgDiv = document.createElement('div');
   const svgDivContent = document.createElement('div');
@@ -73,6 +87,7 @@ const createSVG = (WIDTH, HEIGHT) => {
   svgDiv.classList.add('item');
   svgDivContent.classList.add('item-content');
   svg.setAttribute('id', svgID);
+  svg.classList.add(fieldReceived);
 
   svgDivContent.append(svg);
   svgDiv.append(svgDivContent);
@@ -96,4 +111,28 @@ const chooseField = (country, fieldReceived) => {
   if (fieldReceived === 'TotalConfirmed') return country.TotalConfirmed;
   if (fieldReceived === 'TotalDeaths') return country.TotalDeaths;
   if (fieldReceived === 'TotalRecovered') return country.TotalRecovered;
+};
+
+const addRemoveEvent = (svgID) => {
+  const svg = document.querySelector(`#${svgID}`);
+  const itemContent = svg.parentNode;
+  const item = svg.parentNode.parentNode;
+
+  item.addEventListener('dblclick', (e) => {
+    console.log(item);
+    const removedItem = grid.remove([item], { removeElements: true });
+    console.log(removedItem);
+  });
+};
+
+const createSVGWidthContent = (content, fieldReceived) => {
+  const svgDivContent = content;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const svgID = generateID();
+
+  svg.setAttribute('id', svgID);
+  svg.classList.add(fieldReceived);
+
+  svgDivContent.append(svg);
+  return svgID;
 };
