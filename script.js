@@ -20,5 +20,4 @@ fetchData();
 
 //TODO: Add double click on chart to delete
 //TODO: API and more charts
-//TODO: Local storage
 //TODO: Styles
