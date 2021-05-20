@@ -1,4 +1,4 @@
-import { createChart } from './d3Functions.js';
+import { createChart } from './charts_d3.js';
 
 const fieldsToUseInChart = {
   NEW_CONFIRMED: 'NewConfirmed',
@@ -193,11 +193,10 @@ window.addEventListener(
   true
 );
 
-const getStoredCharts = () => {
+export const getStoredCharts = () => {
   if (localStorage.getItem('charts')) {
     const storedCharts = JSON.parse(localStorage.getItem('charts'));
     const sizes = { x: 1000, y: 600 };
-    console.log(storedCharts.length);
 
     if (storedCharts.length === 2) {
       sizes.x = 510;
@@ -215,8 +214,38 @@ const getStoredCharts = () => {
     }
 
     storedCharts.forEach((chart) => {
-      console.log(sizes);
       createChart(data, chart.field, sizes.x, sizes.y, null, true);
     });
   }
+};
+
+export const resizeAll = () => {
+  const itemsElements = document.querySelectorAll('.item');
+  const sizes = { x: 1000, y: 600 };
+
+  if (itemsElements.length === 2) {
+    sizes.x = 510;
+    sizes.y = 400;
+  }
+
+  if (itemsElements.length >= 3 && itemsElements.length <= 4) {
+    sizes.x = 450;
+    sizes.y = 300;
+  }
+
+  if (itemsElements.length > 4) {
+    sizes.x = 300;
+    sizes.y = 200;
+  }
+
+  itemsElements.forEach((itemEl) => {
+    console.log(sizes);
+    itemEl.style.width = `${sizes.x}px`;
+    itemEl.style.height = `${sizes.y}px`;
+
+    const svg = itemEl.children[0].children[0];
+
+    createChart(data, null, sizes.x, sizes.y, svg, false);
+    grid.refreshItems();
+  });
 };

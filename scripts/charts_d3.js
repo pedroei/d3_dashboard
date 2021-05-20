@@ -1,3 +1,4 @@
+import { getStoredCharts, resizeAll } from './dragging.js';
 //D3
 export const createChart = (
   countries,
@@ -100,7 +101,7 @@ const createSVG = (WIDTH, HEIGHT, fieldReceived) => {
   svgDiv.append(svgDivContent);
   grid.add(svgDiv);
 
-  //addRemoveEvent(svgDiv);
+  addRemoveEvent(svgDiv, fieldReceived);
   return svgID;
 };
 
@@ -121,21 +122,15 @@ const chooseField = (country, fieldReceived) => {
   if (fieldReceived === 'TotalRecovered') return country.TotalRecovered;
 };
 
-const addRemoveEvent = (item) => {
-  const itemContent = item.children[0];
-  const svg = item.children[0];
+const addRemoveEvent = (itemEl, field) => {
+  itemEl.addEventListener('dblclick', (e) => {
+    const item = grid.getItems(itemEl)[0];
 
-  item.addEventListener('dblclick', (e) => {
-    grid.remove([e.target.parentNode.parentNode], {
-      removeElements: true,
-    });
-    svg.remove();
-    itemContent.remove();
+    grid.remove(grid.getItems(itemEl), { removeElements: true });
     grid.refreshItems();
-    const ite = grid.getItem(0);
-    console.log(ite._element);
-    grid.remove(ite._element);
-    console.log(document.querySelectorAll('.item'));
+    grid.layout();
+
+    removeFromLocalStorage({ field });
   });
 };
 
@@ -161,4 +156,15 @@ const saveToLocalStorage = (field) => {
   }
   storedCharts.push({ field });
   window.localStorage.setItem('charts', JSON.stringify(storedCharts));
+};
+
+const removeFromLocalStorage = (itemToRemove) => {
+  let storedCharts = JSON.parse(localStorage.getItem('charts'));
+
+  const foundItem = storedCharts.find((c) => c.field === itemToRemove.field);
+  const itemIndex = storedCharts.indexOf(foundItem);
+  storedCharts.splice(itemIndex, 1);
+
+  window.localStorage.setItem('charts', JSON.stringify(storedCharts));
+  // resizeAll();
 };
