@@ -32,6 +32,11 @@ export const addDraggingEvents = (allCountries) => {
   });
 
   container.addEventListener('drop', (e) => {
+    // console.log(
+    //   document
+    //     .querySelectorAll('.item')
+    //     .forEach((it) => console.log(it.children[0].children[0].classList))
+    // );
     e.preventDefault();
     const draggable = document.querySelector('.dragging');
 
@@ -192,6 +197,22 @@ window.addEventListener(
   },
   true
 );
+
+window.addEventListener('beforeunload', () => {
+  // stores ordered charts when closing
+  const orderedArray = [];
+
+  if (grid.getItems()) {
+    grid.getItems().forEach((item) => {
+      console.log(item._element.children[0].children[0].classList.value);
+      orderedArray.push({
+        field: item._element.children[0].children[0].classList.value,
+      });
+    });
+  }
+
+  window.localStorage.setItem('charts', JSON.stringify(orderedArray));
+});
 
 export const getStoredCharts = () => {
   if (localStorage.getItem('charts')) {
