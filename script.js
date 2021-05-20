@@ -19,5 +19,6 @@ const fetchData = async () => {
 fetchData();
 
 //TODO: Add double click on chart to delete
-//TODO: Responsive
+//TODO: API and more charts
+//TODO: Local storage
 //TODO: Styles

@@ -1,4 +1,3 @@
-import { chartContainer } from './elements.js';
 //D3
 export const createChart = (countries, fieldReceived, width, height, svg) => {
   let fieldToUse;
@@ -26,8 +25,6 @@ export const createChart = (countries, fieldReceived, width, height, svg) => {
   } else {
     svgID = createSVGWidthContent(content, fieldToUse);
   }
-
-  //addRemoveEvent(svgID);
 
   const x = d3.scaleBand().rangeRound([0, CHART_WIDTH]).padding(0.1);
   const y = d3.scaleLinear().range([CHART_HEIGHT, 0]);
@@ -92,7 +89,8 @@ const createSVG = (WIDTH, HEIGHT, fieldReceived) => {
   svgDivContent.append(svg);
   svgDiv.append(svgDivContent);
   grid.add(svgDiv);
-  // grid.remove(svgDiv);
+
+  //addRemoveEvent(svgDiv);
   return svgID;
 };
 
@@ -113,15 +111,21 @@ const chooseField = (country, fieldReceived) => {
   if (fieldReceived === 'TotalRecovered') return country.TotalRecovered;
 };
 
-const addRemoveEvent = (svgID) => {
-  const svg = document.querySelector(`#${svgID}`);
-  const itemContent = svg.parentNode;
-  const item = svg.parentNode.parentNode;
+const addRemoveEvent = (item) => {
+  const itemContent = item.children[0];
+  const svg = item.children[0];
 
   item.addEventListener('dblclick', (e) => {
-    console.log(item);
-    const removedItem = grid.remove([item], { removeElements: true });
-    console.log(removedItem);
+    grid.remove([e.target.parentNode.parentNode], {
+      removeElements: true,
+    });
+    svg.remove();
+    itemContent.remove();
+    grid.refreshItems();
+    const ite = grid.getItem(0);
+    console.log(ite._element);
+    grid.remove(ite._element);
+    console.log(document.querySelectorAll('.item'));
   });
 };
 
