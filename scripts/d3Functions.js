@@ -1,5 +1,12 @@
 //D3
-export const createChart = (countries, fieldReceived, width, height, svg) => {
+export const createChart = (
+  countries,
+  fieldReceived,
+  width,
+  height,
+  svg,
+  local
+) => {
   let fieldToUse;
   if (fieldReceived) fieldToUse = fieldReceived;
 
@@ -9,6 +16,9 @@ export const createChart = (countries, fieldReceived, width, height, svg) => {
     content = svg.parentNode;
     svg.remove();
   }
+
+  if (!svg && !local) saveToLocalStorage(fieldToUse);
+
   const MARGINS = { top: 20, bottom: 10 };
   const CHART_WIDTH = width;
   const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
@@ -139,4 +149,16 @@ const createSVGWidthContent = (content, fieldReceived) => {
 
   svgDivContent.append(svg);
   return svgID;
+};
+
+const saveToLocalStorage = (field) => {
+  let storedCharts;
+
+  if (localStorage.getItem('charts')) {
+    storedCharts = JSON.parse(localStorage.getItem('charts'));
+  } else {
+    storedCharts = [];
+  }
+  storedCharts.push({ field });
+  window.localStorage.setItem('charts', JSON.stringify(storedCharts));
 };

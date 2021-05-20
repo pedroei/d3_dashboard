@@ -44,7 +44,7 @@ export const addDraggingEvents = (allCountries) => {
 
         const svg = item.children[0].children[0];
 
-        createChart(allCountries, null, 510, 400, svg);
+        createChart(allCountries, null, 510, 400, svg, false);
       });
       grid.refreshItems();
       sizesXY = [510, 400];
@@ -124,6 +124,8 @@ export const addDraggingEvents = (allCountries) => {
       );
     }
   });
+
+  getStoredCharts();
 };
 
 window.addEventListener(
@@ -141,7 +143,7 @@ window.addEventListener(
 
           const svg = item.children[0].children[0];
 
-          createChart(data, null, 1000, 600, svg);
+          createChart(data, null, 1000, 600, svg, false);
         });
         grid.refreshItems();
         sizesXY = [1000, 600];
@@ -153,7 +155,7 @@ window.addEventListener(
 
           const svg = item.children[0].children[0];
 
-          createChart(data, null, 510, 400, svg);
+          createChart(data, null, 510, 400, svg, false);
         });
         grid.refreshItems();
         sizesXY = [510, 400];
@@ -168,7 +170,7 @@ window.addEventListener(
 
         const svg = item.children[0].children[0];
 
-        createChart(data, null, 450, 300, svg);
+        createChart(data, null, 450, 300, svg, false);
       });
       grid.refreshItems();
       sizesXY = [450, 300];
@@ -182,7 +184,7 @@ window.addEventListener(
 
         const svg = item.children[0].children[0];
 
-        createChart(data, null, 300, 200, svg);
+        createChart(data, null, 300, 200, svg, false);
       });
       grid.refreshItems();
       sizesXY = [300, 200];
@@ -190,3 +192,31 @@ window.addEventListener(
   },
   true
 );
+
+const getStoredCharts = () => {
+  if (localStorage.getItem('charts')) {
+    const storedCharts = JSON.parse(localStorage.getItem('charts'));
+    const sizes = { x: 1000, y: 600 };
+    console.log(storedCharts.length);
+
+    if (storedCharts.length === 2) {
+      sizes.x = 510;
+      sizes.y = 400;
+    }
+
+    if (storedCharts.length >= 3 && storedCharts.length <= 4) {
+      sizes.x = 450;
+      sizes.y = 300;
+    }
+
+    if (storedCharts.length > 4) {
+      sizes.x = 300;
+      sizes.y = 200;
+    }
+
+    storedCharts.forEach((chart) => {
+      console.log(sizes);
+      createChart(data, chart.field, sizes.x, sizes.y, null, true);
+    });
+  }
+};
