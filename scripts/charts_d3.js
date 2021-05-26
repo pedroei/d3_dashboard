@@ -168,3 +168,216 @@ const removeFromLocalStorage = (itemToRemove) => {
   window.localStorage.setItem('charts', JSON.stringify(storedCharts));
   // resizeAll();
 };
+
+export const createPieChart = (
+  countries,
+  fieldReceived,
+  width,
+  height,
+  svg,
+  local
+) => {
+  let fieldToUse;
+  if (fieldReceived) fieldToUse = fieldReceived;
+
+  let content;
+  if (svg) {
+    fieldToUse = svg.classList[0];
+    content = svg.parentNode;
+    svg.remove();
+  }
+
+  if (!svg && !local) saveToLocalStorage(fieldToUse);
+
+  const MARGINS = { top: 20, bottom: 20, right: 20, left: 45 };
+  const CHART_WIDTH = width - MARGINS.left - MARGINS.right;
+  const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
+
+  // const AUGMENTED_SCALE = 10000000;
+
+  let svgID;
+  if (!svg) {
+    svgID = createSVG(
+      CHART_WIDTH,
+      CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
+      fieldToUse
+    );
+  } else {
+    svgID = createSVGWidthContent(content, fieldToUse);
+  }
+
+  // const x = d3.scaleBand().rangeRound([0, CHART_WIDTH]).padding(0.1);
+  // const y = d3.scaleLinear().range([CHART_HEIGHT, 0]);
+
+  const chart = d3
+    .select(`#${svgID}`)
+    .attr('width', CHART_WIDTH + MARGINS.left + MARGINS.right)
+    .attr('height', CHART_HEIGHT + MARGINS.top + MARGINS.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + MARGINS.left + ',' + MARGINS.top + ')');
+
+  const pieContainer = chart
+    .append('g')
+    .attr(
+      'transform',
+      'translate(' + CHART_WIDTH / 2 + ' ' + CHART_HEIGHT / 2 + ')'
+    );
+
+  const colors = (i) => d3.interpolateReds(i / 6);
+
+  const arc = d3
+    .arc()
+    .outerRadius((CHART_HEIGHT / 2) * 0.6)
+    .innerRadius((CHART_HEIGHT / 2) * 0.3);
+
+  const popupArc = d3
+    .arc()
+    .outerRadius((CHART_HEIGHT / 2) * 0.65)
+    .innerRadius((CHART_HEIGHT / 2) * 0.3);
+
+  const labelsArc = d3
+    .arc()
+    .outerRadius((CHART_HEIGHT / 2) * 0.7)
+    .innerRadius((CHART_HEIGHT / 2) * 0.7);
+
+  pieContainer
+    .append('path')
+    .attr('class', 'backgroundArc')
+    .attr('d', arc({ startAngle: 0, endAngle: 2 * Math.PI }));
+
+  const filtered = countries.map((c) => c.TotalDeaths);
+  let totalCases = 0;
+  countries.forEach((c) => (totalCases += c.TotalConfirmed));
+
+  const totalDeaths = filtered.reduce((a, b) => a + b, 0);
+
+  const pie = d3
+    .pie()
+    .sort(null)
+    .padAngle(0.04)
+    .value((d) => d);
+
+  const arcs = pie(filtered);
+  arcs.forEach((arc) => {
+    countries.forEach((c) => {
+      if (c.TotalDeaths === arc.data) {
+        arc.label = c.Country;
+      }
+    });
+  });
+
+  const arcElements = pieContainer.selectAll('.arc').data(arcs);
+
+  arcElements
+    .enter()
+    .append('path')
+    .attr('class', 'arc')
+    .style('fill', (d, i) => colors(i))
+    .merge(arcElements)
+    .on('mouseover', function (d) {
+      d3.select(this).attr('d', function (d) {
+        return popupArc(d);
+      });
+      let centerText = pieContainer.selectAll('.center').data([d]);
+      centerText
+        .enter()
+        .append('text')
+        .attr('class', 'center')
+        .style('text-anchor', 'middle')
+        .merge(centerText)
+        .text(function (d) {
+          console.log(d);
+          return totalDeaths; // Math.round((+d.data.count / totalDeaths) * 100) + '%';
+        });
+    })
+    .on('mouseout', function (d) {
+      d3.select(this).attr('d', function (d) {
+        return arc(d);
+      });
+      pieContainer.selectAll('.center').text('');
+    })
+    .transition()
+    .ease(d3.easeCircle)
+    .duration(2000)
+    .attrTween('d', tweenArcs);
+
+  const textElements = pieContainer.selectAll('.labels').data(arcs);
+
+  textElements
+    .enter()
+    .append('text')
+    .attr('class', 'labels')
+    .merge(textElements)
+    .text(function (d) {
+      return `${d.label}(${d.data})`;
+    })
+    .attr('dy', '0.35em')
+    .transition()
+    .ease(d3.easeCircle)
+    .duration(2000)
+    .attrTween('transform', tweenLabels)
+    .styleTween('text-anchor', tweenAnchor);
+
+  const lineElements = pieContainer.selectAll('.lines').data(arcs);
+  lineElements
+    .enter()
+    .append('path')
+    .attr('class', 'lines')
+    .merge(lineElements)
+    .transition()
+    .ease(d3.easeCircle)
+    .duration(2000)
+    .attrTween('d', tweenLines);
+
+  function tweenAnchor(d) {
+    const interpolator = getArcInterpolator(this, d);
+    return function (t) {
+      const x = labelsArc.centroid(interpolator(t))[0];
+      return x > 0 ? 'start' : 'end';
+    };
+  }
+
+  function tweenLines(d) {
+    const interpolator = getArcInterpolator(this, d);
+    const lineGen = d3.line();
+    return function (t) {
+      const dInt = interpolator(t);
+      const start = arc.centroid(dInt);
+      const xy = labelsArc.centroid(dInt);
+      let textXy = [xy[0], xy[1]];
+      textXy[0] = textXy[0] * 1.15;
+      return lineGen([start, xy, textXy]);
+    };
+  }
+
+  function tweenLabels(d) {
+    const interpolator = getArcInterpolator(this, d);
+    return function (t) {
+      const p = labelsArc.centroid(interpolator(t));
+      let xy = p;
+      xy[0] = xy[0] * 1.2;
+      return 'translate(' + xy + ')';
+    };
+  }
+
+  function tweenArcs(d) {
+    var interpolator = getArcInterpolator(this, d);
+    return function (t) {
+      return arc(interpolator(t));
+    };
+  }
+
+  function getArcInterpolator(el, d) {
+    var oldValue = el._oldValue;
+    const interpolator = d3.interpolate(
+      {
+        startAngle: oldValue ? oldValue.startAngle : 0,
+        endAngle: oldValue ? oldValue.endAngle : 0,
+      },
+      d
+    );
+    el._oldValue = interpolator(0);
+
+    return interpolator;
+  }
+};

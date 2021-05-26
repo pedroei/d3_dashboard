@@ -18,5 +18,8 @@ const fetchData = async () => {
 
 fetchData();
 
-//TODO: API and more charts
+//TODO: more different charts
+//TODO: Refresh data for in a period of time
+//TODO: Add an api with four more charts
+//TODO: More countries in bar chart, and adapt next charts to have more countries (if it makes sense)
 //TODO: Styles (don't forget collapse sidenav)

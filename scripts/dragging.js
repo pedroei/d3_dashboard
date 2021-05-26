@@ -1,4 +1,4 @@
-import { createChart } from './charts_d3.js';
+import { createChart, createPieChart } from './charts_d3.js';
 
 const fieldsToUseInChart = {
   NEW_CONFIRMED: 'NewConfirmed',
@@ -42,20 +42,21 @@ export const addDraggingEvents = (allCountries) => {
 
     const items = document.querySelectorAll('.item');
 
+    // if (items.length > 0) {
+    //   items.forEach((item) => {
+    //     item.style.width = '510px';
+    //     item.style.height = '400px';
+
+    //     const svg = item.children[0].children[0];
+
+    //     createChart(allCountries, null, 510, 400, svg, false);
+    //   });
+    //   grid.refreshItems();
+    //   sizesXY = [510, 400];
+    // }
+
     if (items.length > 0) {
-      items.forEach((item) => {
-        item.style.width = '510px';
-        item.style.height = '400px';
-
-        const svg = item.children[0].children[0];
-
-        createChart(allCountries, null, 510, 400, svg, false);
-      });
-      grid.refreshItems();
-      sizesXY = [510, 400];
-    }
-
-    if (items.length > 1) {
+      // if (items.length > 1) {
       items.forEach((item) => {
         item.style.width = '450px';
         item.style.height = '300px';
@@ -69,19 +70,19 @@ export const addDraggingEvents = (allCountries) => {
     }
     if (items.length > 3) {
       items.forEach((item) => {
-        item.style.width = '300px';
+        item.style.width = '280px';
         item.style.height = '200px';
 
         const svg = item.children[0].children[0];
 
-        createChart(allCountries, null, 300, 200, svg);
+        createChart(allCountries, null, 280, 200, svg);
       });
       grid.refreshItems();
-      sizesXY = [300, 200];
+      sizesXY = [280, 200];
     }
 
     if (draggable.id == 'deaths-country') {
-      createChart(
+      createPieChart(
         allCountries,
         fieldsToUseInChart.TOTAL_DEATHS,
         sizesXY[0],
@@ -153,18 +154,18 @@ window.addEventListener(
         grid.refreshItems();
         sizesXY = [1000, 600];
       }
-      if (items.length <= 2) {
-        items.forEach((item) => {
-          item.style.width = '510px';
-          item.style.height = '400px';
+      // if (items.length <= 2) {
+      //   items.forEach((item) => {
+      //     item.style.width = '510px';
+      //     item.style.height = '400px';
 
-          const svg = item.children[0].children[0];
+      //     const svg = item.children[0].children[0];
 
-          createChart(data, null, 510, 400, svg, false);
-        });
-        grid.refreshItems();
-        sizesXY = [510, 400];
-      }
+      //     createChart(data, null, 510, 400, svg, false);
+      //   });
+      //   grid.refreshItems();
+      //   sizesXY = [510, 400];
+      // }
     }
 
     if (w <= 950) {
@@ -184,15 +185,15 @@ window.addEventListener(
     if (w <= 650) {
       const items = document.querySelectorAll('.item');
       items.forEach((item) => {
-        item.style.width = '300px';
+        item.style.width = '280px';
         item.style.height = '200px';
 
         const svg = item.children[0].children[0];
 
-        createChart(data, null, 300, 200, svg, false);
+        createChart(data, null, 280, 200, svg, false);
       });
       grid.refreshItems();
-      sizesXY = [300, 200];
+      sizesXY = [280, 200];
     }
   },
   true
@@ -219,18 +220,19 @@ export const getStoredCharts = () => {
     const storedCharts = JSON.parse(localStorage.getItem('charts'));
     const sizes = { x: 1000, y: 600 };
 
-    if (storedCharts.length === 2) {
-      sizes.x = 510;
-      sizes.y = 400;
-    }
+    // if (storedCharts.length === 2) {
+    //   sizes.x = 510;
+    //   sizes.y = 400;
+    // }
 
-    if (storedCharts.length >= 3 && storedCharts.length <= 4) {
+    // if (storedCharts.length >= 3 && storedCharts.length <= 4) {
+    if (storedCharts.length >= 2 && storedCharts.length <= 4) {
       sizes.x = 450;
       sizes.y = 300;
     }
 
     if (storedCharts.length > 4) {
-      sizes.x = 300;
+      sizes.x = 280;
       sizes.y = 200;
     }
 
@@ -244,18 +246,19 @@ export const resizeAll = () => {
   const itemsElements = document.querySelectorAll('.item');
   const sizes = { x: 1000, y: 600 };
 
-  if (itemsElements.length === 2) {
-    sizes.x = 510;
-    sizes.y = 400;
-  }
+  // if (itemsElements.length === 2) {
+  //   sizes.x = 510;
+  //   sizes.y = 400;
+  // }
 
-  if (itemsElements.length >= 3 && itemsElements.length <= 4) {
+  if (itemsElements.length >= 2 && itemsElements.length <= 4) {
+    // if (itemsElements.length >= 3 && itemsElements.length <= 4) {
     sizes.x = 450;
     sizes.y = 300;
   }
 
   if (itemsElements.length > 4) {
-    sizes.x = 300;
+    sizes.x = 280;
     sizes.y = 200;
   }
 

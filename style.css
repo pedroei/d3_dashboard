@@ -100,6 +100,17 @@ body {
   height: 100%;
 }
 
+.backgroundArc {
+  fill: #ddd;
+}
+
+.chart {
+  margin: 10px;
+  border-radius: 5px;
+  border: solid #555555 thin;
+  background-color: #eee;
+}
+
 @media screen and (max-width: 950px) {
   .custom-sidenav {
     display: none;
