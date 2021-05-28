@@ -1,4 +1,4 @@
-import { createChart, createPieChart } from './charts_d3.js';
+import { createChart, createDonutChart } from './charts_d3.js';
 
 const fieldsToUseInChart = {
   NEW_CONFIRMED: 'NewConfirmed',
@@ -63,7 +63,8 @@ export const addDraggingEvents = (allCountries) => {
 
         const svg = item.children[0].children[0];
 
-        createChart(allCountries, null, 450, 300, svg);
+        decideChartAndCreate(item, allCountries, null, 450, 300, svg, null);
+        // createChart(allCountries, null, 450, 300, svg);
       });
       grid.refreshItems();
       sizesXY = [450, 300];
@@ -75,14 +76,15 @@ export const addDraggingEvents = (allCountries) => {
 
         const svg = item.children[0].children[0];
 
-        createChart(allCountries, null, 280, 200, svg);
+        decideChartAndCreate(item, allCountries, null, 280, 200, svg, null);
+        // createChart(allCountries, null, 280, 200, svg);
       });
       grid.refreshItems();
       sizesXY = [280, 200];
     }
 
     if (draggable.id == 'deaths-country') {
-      createPieChart(
+      createDonutChart(
         allCountries,
         fieldsToUseInChart.TOTAL_DEATHS,
         sizesXY[0],
@@ -205,13 +207,12 @@ window.addEventListener('beforeunload', () => {
 
   if (grid.getItems()) {
     grid.getItems().forEach((item) => {
-      console.log(item._element.children[0].children[0].classList.value);
       orderedArray.push({
-        field: item._element.children[0].children[0].classList.value,
+        field: item._element.children[0].children[0].classList[0],
+        type: item._element.children[0].children[0].classList[1],
       });
     });
   }
-
   window.localStorage.setItem('charts', JSON.stringify(orderedArray));
 });
 
@@ -237,7 +238,12 @@ export const getStoredCharts = () => {
     }
 
     storedCharts.forEach((chart) => {
-      createChart(data, chart.field, sizes.x, sizes.y, null, true);
+      if (chart.type === 'bar') {
+        createChart(data, chart.field, sizes.x, sizes.y, null, true);
+      }
+      if (chart.type === 'donut') {
+        createDonutChart(data, chart.field, sizes.x, sizes.y, null, true);
+      }
     });
   }
 };
@@ -272,4 +278,20 @@ export const resizeAll = () => {
     createChart(data, null, sizes.x, sizes.y, svg, false);
     grid.refreshItems();
   });
+};
+
+const decideChartAndCreate = (
+  item,
+  allCountries,
+  field,
+  width,
+  height,
+  svg,
+  local
+) => {
+  if (item.children[0].children[0].classList.contains('bar')) {
+    createChart(allCountries, field, width, height, svg);
+  } else if (item.children[0].children[0].classList.contains('donut')) {
+    createDonutChart(allCountries, field, width, height, svg);
+  }
 };

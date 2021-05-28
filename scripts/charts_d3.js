@@ -1,13 +1,15 @@
 import { getStoredCharts, resizeAll } from './dragging.js';
 //D3
 export const createChart = (
-  countries,
+  rawCountries,
   fieldReceived,
   width,
   height,
   svg,
   local
 ) => {
+  const countries = getFilteredCountries(rawCountries, 'bar');
+
   let fieldToUse;
   if (fieldReceived) fieldToUse = fieldReceived;
 
@@ -18,7 +20,7 @@ export const createChart = (
     svg.remove();
   }
 
-  if (!svg && !local) saveToLocalStorage(fieldToUse);
+  if (!svg && !local) saveToLocalStorage({ field: fieldToUse, type: 'bar' });
 
   const MARGINS = { top: 20, bottom: 10 };
   const CHART_WIDTH = width;
@@ -31,10 +33,11 @@ export const createChart = (
     svgID = createSVG(
       CHART_WIDTH,
       CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
-      fieldToUse
+      fieldToUse,
+      'bar'
     );
   } else {
-    svgID = createSVGWidthContent(content, fieldToUse);
+    svgID = createSVGWidthContent(content, fieldToUse, 'bar');
   }
 
   const x = d3.scaleBand().rangeRound([0, CHART_WIDTH]).padding(0.1);
@@ -76,13 +79,14 @@ export const createChart = (
     .enter()
     .append('text')
     .text((data) => chooseField(data, fieldToUse))
+    .style('font-size', '11px')
     .attr('x', (data) => x(data.CountryCode) + x.bandwidth() / 2)
     .attr('y', (data) => y(chooseField(data, fieldToUse)) - 20)
     .attr('text-anchor', 'middle')
     .classed('label', true);
 };
 
-const createSVG = (WIDTH, HEIGHT, fieldReceived) => {
+const createSVG = (WIDTH, HEIGHT, fieldReceived, type) => {
   //svg is in a different namespace
   const svgDiv = document.createElement('div');
   const svgDivContent = document.createElement('div');
@@ -96,12 +100,13 @@ const createSVG = (WIDTH, HEIGHT, fieldReceived) => {
   svgDivContent.classList.add('item-content');
   svg.setAttribute('id', svgID);
   svg.classList.add(fieldReceived);
+  svg.classList.add(type);
 
   svgDivContent.append(svg);
   svgDiv.append(svgDivContent);
   grid.add(svgDiv);
 
-  addRemoveEvent(svgDiv, fieldReceived);
+  addRemoveEvent(svgDiv, fieldReceived, type);
   return svgID;
 };
 
@@ -122,7 +127,7 @@ const chooseField = (country, fieldReceived) => {
   if (fieldReceived === 'TotalRecovered') return country.TotalRecovered;
 };
 
-const addRemoveEvent = (itemEl, field) => {
+const addRemoveEvent = (itemEl, field, type) => {
   itemEl.addEventListener('dblclick', (e) => {
     const item = grid.getItems(itemEl)[0];
 
@@ -130,23 +135,24 @@ const addRemoveEvent = (itemEl, field) => {
     grid.refreshItems();
     grid.layout();
 
-    removeFromLocalStorage({ field });
+    removeFromLocalStorage({ field: field, type: type });
   });
 };
 
-const createSVGWidthContent = (content, fieldReceived) => {
+const createSVGWidthContent = (content, fieldReceived, type) => {
   const svgDivContent = content;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   const svgID = generateID();
 
   svg.setAttribute('id', svgID);
   svg.classList.add(fieldReceived);
+  svg.classList.add(type);
 
   svgDivContent.append(svg);
   return svgID;
 };
 
-const saveToLocalStorage = (field) => {
+const saveToLocalStorage = (chartObject) => {
   let storedCharts;
 
   if (localStorage.getItem('charts')) {
@@ -154,7 +160,7 @@ const saveToLocalStorage = (field) => {
   } else {
     storedCharts = [];
   }
-  storedCharts.push({ field });
+  storedCharts.push(chartObject);
   window.localStorage.setItem('charts', JSON.stringify(storedCharts));
 };
 
@@ -169,14 +175,16 @@ const removeFromLocalStorage = (itemToRemove) => {
   // resizeAll();
 };
 
-export const createPieChart = (
-  countries,
+export const createDonutChart = (
+  rawCountries,
   fieldReceived,
   width,
   height,
   svg,
   local
 ) => {
+  const countries = getFilteredCountries(rawCountries, 'donut');
+
   let fieldToUse;
   if (fieldReceived) fieldToUse = fieldReceived;
 
@@ -187,7 +195,7 @@ export const createPieChart = (
     svg.remove();
   }
 
-  if (!svg && !local) saveToLocalStorage(fieldToUse);
+  if (!svg && !local) saveToLocalStorage({ field: fieldToUse, type: 'donut' });
 
   const MARGINS = { top: 20, bottom: 20, right: 20, left: 45 };
   const CHART_WIDTH = width - MARGINS.left - MARGINS.right;
@@ -198,12 +206,13 @@ export const createPieChart = (
   let svgID;
   if (!svg) {
     svgID = createSVG(
-      CHART_WIDTH,
+      CHART_WIDTH + MARGINS.left + MARGINS.right,
       CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
-      fieldToUse
+      fieldToUse,
+      'donut'
     );
   } else {
-    svgID = createSVGWidthContent(content, fieldToUse);
+    svgID = createSVGWidthContent(content, fieldToUse, 'donut');
   }
 
   // const x = d3.scaleBand().rangeRound([0, CHART_WIDTH]).padding(0.1);
@@ -261,11 +270,10 @@ export const createPieChart = (
   arcs.forEach((arc) => {
     countries.forEach((c) => {
       if (c.TotalDeaths === arc.data) {
-        arc.label = c.Country;
+        arc.label = c.CountryCode;
       }
     });
   });
-
   const arcElements = pieContainer.selectAll('.arc').data(arcs);
 
   arcElements
@@ -286,8 +294,9 @@ export const createPieChart = (
         .style('text-anchor', 'middle')
         .merge(centerText)
         .text(function (d) {
-          console.log(d);
-          return totalDeaths; // Math.round((+d.data.count / totalDeaths) * 100) + '%';
+          return (
+            Math.round((d.toElement.__data__.data / totalDeaths) * 100) + '%'
+          );
         });
     })
     .on('mouseout', function (d) {
@@ -311,6 +320,7 @@ export const createPieChart = (
     .text(function (d) {
       return `${d.label}(${d.data})`;
     })
+    .style('font-size', '13px')
     .attr('dy', '0.35em')
     .transition()
     .ease(d3.easeCircle)
@@ -379,5 +389,29 @@ export const createPieChart = (
     el._oldValue = interpolator(0);
 
     return interpolator;
+  }
+};
+
+const getFilteredCountries = (raw, type) => {
+  if (type === 'bar') {
+    return raw.filter(
+      (c) =>
+        c.Country === 'Portugal' ||
+        c.Country === 'United Kingdom' ||
+        c.Country === 'Germany' ||
+        c.Country === 'United States of America' ||
+        c.Country === 'Spain' ||
+        c.Country === 'India' ||
+        c.Country === 'Brazil'
+    );
+  } else if (type === 'donut') {
+    return raw.filter(
+      (c) =>
+        c.Country === 'Portugal' ||
+        c.Country === 'United Kingdom' ||
+        c.Country === 'Germany' ||
+        c.Country === 'United States of America' ||
+        c.Country === 'Spain'
+    );
   }
 };
