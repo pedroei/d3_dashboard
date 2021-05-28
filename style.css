@@ -111,6 +111,13 @@ body {
   background-color: #eee;
 }
 
+.fa-times {
+  position: absolute;
+  color: red;
+  top: 10px;
+  right: -25px;
+}
+
 @media screen and (max-width: 950px) {
   .custom-sidenav {
     display: none;

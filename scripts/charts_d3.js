@@ -93,6 +93,11 @@ const createSVG = (WIDTH, HEIGHT, fieldReceived, type) => {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   const svgID = generateID();
 
+  const deleteBtn = document.createElement('i');
+  deleteBtn.classList.add('fas');
+  deleteBtn.classList.add('fa-times');
+  deleteBtn.classList.add('fa-sm');
+
   svgDiv.style.width = `${WIDTH}px`;
   svgDiv.style.height = `${HEIGHT}px`;
 
@@ -104,9 +109,10 @@ const createSVG = (WIDTH, HEIGHT, fieldReceived, type) => {
 
   svgDivContent.append(svg);
   svgDiv.append(svgDivContent);
+  svgDiv.append(deleteBtn);
   grid.add(svgDiv);
 
-  addRemoveEvent(svgDiv, fieldReceived, type);
+  addRemoveEvent(svgDiv, fieldReceived, type, deleteBtn);
   return svgID;
 };
 
@@ -127,8 +133,8 @@ const chooseField = (country, fieldReceived) => {
   if (fieldReceived === 'TotalRecovered') return country.TotalRecovered;
 };
 
-const addRemoveEvent = (itemEl, field, type) => {
-  itemEl.addEventListener('dblclick', (e) => {
+const addRemoveEvent = (itemEl, field, type, btn) => {
+  btn.addEventListener('click', (e) => {
     const item = grid.getItems(itemEl)[0];
 
     grid.remove(grid.getItems(itemEl), { removeElements: true });
