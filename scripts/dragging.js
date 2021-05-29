@@ -140,8 +140,8 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
       createMapChart(
         allCountries,
         fieldsToUseInChart.TOTAL_CONFIRMED,
-        sizesXY[0],
-        sizesXY[1]
+        920,
+        450
       );
     }
   });
@@ -186,12 +186,16 @@ window.addEventListener(
     if (w <= 950) {
       const items = document.querySelectorAll('.item');
       items.forEach((item) => {
-        item.style.width = '440px';
-        item.style.height = '300px';
-
         const svg = item.children[0].children[0];
+        if (svg.classList.contains('map')) {
+          item.style.width = '920px';
+          item.style.height = '450px';
+        } else {
+          item.style.width = '440px';
+          item.style.height = '300px';
+        }
 
-        createChart(data, null, 440, 300, svg, false);
+        decideChartAndCreate(item, allCountries, null, 440, 300, svg, null);
       });
       grid.refreshItems();
       sizesXY = [440, 300];
@@ -200,12 +204,16 @@ window.addEventListener(
     if (w <= 650) {
       const items = document.querySelectorAll('.item');
       items.forEach((item) => {
-        item.style.width = '280px';
-        item.style.height = '200px';
-
         const svg = item.children[0].children[0];
+        if (svg.classList.contains('map')) {
+          item.style.width = '920px';
+          item.style.height = '450px';
+        } else {
+          item.style.width = '280px';
+          item.style.height = '200px';
+        }
 
-        createChart(data, null, 280, 200, svg, false);
+        decideChartAndCreate(item, allCountries, null, 280, 200, svg, null);
       });
       grid.refreshItems();
       sizesXY = [280, 200];
