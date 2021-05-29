@@ -47,23 +47,31 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     if (items.length > 0) {
       // if (items.length > 1) {
       items.forEach((item) => {
-        item.style.width = '450px';
-        item.style.height = '300px';
-
         const svg = item.children[0].children[0];
+        if (svg.classList.contains('map')) {
+          item.style.width = '920px';
+          item.style.height = '450px';
+        } else {
+          item.style.width = '440px';
+          item.style.height = '300px';
+        }
 
-        decideChartAndCreate(item, allCountries, null, 450, 300, svg, null);
+        decideChartAndCreate(item, allCountries, null, 440, 300, svg, null);
         // createChart(allCountries, null, 450, 300, svg);
       });
       grid.refreshItems();
-      sizesXY = [450, 300];
+      sizesXY = [440, 300];
     }
     if (items.length > 3) {
       items.forEach((item) => {
-        item.style.width = '280px';
-        item.style.height = '200px';
-
         const svg = item.children[0].children[0];
+        if (svg.classList.contains('map')) {
+          item.style.width = '920px';
+          item.style.height = '450px';
+        } else {
+          item.style.width = '280px';
+          item.style.height = '200px';
+        }
 
         decideChartAndCreate(item, allCountries, null, 280, 200, svg, null);
         // createChart(allCountries, null, 280, 200, svg);
@@ -178,15 +186,15 @@ window.addEventListener(
     if (w <= 950) {
       const items = document.querySelectorAll('.item');
       items.forEach((item) => {
-        item.style.width = '450px';
+        item.style.width = '440px';
         item.style.height = '300px';
 
         const svg = item.children[0].children[0];
 
-        createChart(data, null, 450, 300, svg, false);
+        createChart(data, null, 440, 300, svg, false);
       });
       grid.refreshItems();
-      sizesXY = [450, 300];
+      sizesXY = [440, 300];
     }
 
     if (w <= 650) {
@@ -233,7 +241,7 @@ export const getStoredCharts = () => {
 
     // if (storedCharts.length >= 3 && storedCharts.length <= 4) {
     if (storedCharts.length >= 2 && storedCharts.length <= 4) {
-      sizes.x = 450;
+      sizes.x = 440;
       sizes.y = 300;
     }
 
@@ -253,7 +261,7 @@ export const getStoredCharts = () => {
         createLineChart(dataCountry, chart.field, sizes.x, sizes.y, null, true);
       }
       if (chart.type === 'map') {
-        createMapChart(data, chart.field, sizes.x, sizes.y, null, true);
+        createMapChart(data, chart.field, 920, 450, null, true);
       }
     });
   }
@@ -270,7 +278,7 @@ export const resizeAll = () => {
 
   if (itemsElements.length >= 2 && itemsElements.length <= 4) {
     // if (itemsElements.length >= 3 && itemsElements.length <= 4) {
-    sizes.x = 450;
+    sizes.x = 440;
     sizes.y = 300;
   }
 
@@ -308,6 +316,6 @@ const decideChartAndCreate = (
     createLineChart(dataCountry, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('map')) {
     // createMapChart(allCountries, field, 1000, 450, svg);
-    createMapChart(allCountries, field, width, height, svg);
+    createMapChart(allCountries, field, 920, 450, svg);
   }
 };

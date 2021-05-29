@@ -29,7 +29,5 @@ fetchData();
 // }
 // execute();
 
-//TODO: more different charts
+//TODO: 2 different charts
 //TODO: Refresh data in a period of time
-//TODO: four more charts
-//TODO: Styles (don't forget collapse sidenav)
