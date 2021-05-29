@@ -24,6 +24,11 @@
       referrerpolicy="no-referrer"
     />
 
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+      defer
+    ></script>
+
     <script src="script.js" type="module" defer></script>
     <title>D3 Dashboard</title>
   </head>
@@ -63,6 +68,16 @@
         class="sidenav-item draggable"
         draggable="true"
         >New recovered by country</span
+      >
+      <hr />
+      <span id="cases-this-week" class="sidenav-item draggable" draggable="true"
+        >Cases from this week in Portugal</span
+      >
+      <span
+        id="all-cases-all-countries"
+        class="sidenav-item draggable"
+        draggable="true"
+        >All cases for all countries</span
       >
     </div>
     <div class="main custom-container">

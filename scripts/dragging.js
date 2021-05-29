@@ -1,4 +1,9 @@
-import { createChart, createDonutChart } from './charts_d3.js';
+import {
+  createChart,
+  createDonutChart,
+  createLineChart,
+  createMapChart,
+} from './charts_d3.js';
 
 const fieldsToUseInChart = {
   NEW_CONFIRMED: 'NewConfirmed',
@@ -13,10 +18,12 @@ const draggables = document.querySelectorAll('.draggable');
 const container = document.querySelector('.main');
 
 let data;
+let dataCountry;
 let sizesXY = [1000, 600];
 
-export const addDraggingEvents = (allCountries) => {
+export const addDraggingEvents = (allCountries, dataPortugal) => {
   data = allCountries;
+  dataCountry = dataPortugal;
   draggables.forEach((draggable) => {
     draggable.addEventListener('dragstart', () => {
       draggable.classList.add('dragging');
@@ -32,28 +39,10 @@ export const addDraggingEvents = (allCountries) => {
   });
 
   container.addEventListener('drop', (e) => {
-    // console.log(
-    //   document
-    //     .querySelectorAll('.item')
-    //     .forEach((it) => console.log(it.children[0].children[0].classList))
-    // );
     e.preventDefault();
     const draggable = document.querySelector('.dragging');
 
     const items = document.querySelectorAll('.item');
-
-    // if (items.length > 0) {
-    //   items.forEach((item) => {
-    //     item.style.width = '510px';
-    //     item.style.height = '400px';
-
-    //     const svg = item.children[0].children[0];
-
-    //     createChart(allCountries, null, 510, 400, svg, false);
-    //   });
-    //   grid.refreshItems();
-    //   sizesXY = [510, 400];
-    // }
 
     if (items.length > 0) {
       // if (items.length > 1) {
@@ -127,6 +116,22 @@ export const addDraggingEvents = (allCountries) => {
       createChart(
         allCountries,
         fieldsToUseInChart.NEW_RECOVERED,
+        sizesXY[0],
+        sizesXY[1]
+      );
+    }
+    if (draggable.id == 'cases-this-week') {
+      createLineChart(
+        dataPortugal,
+        fieldsToUseInChart.TOTAL_CONFIRMED,
+        sizesXY[0],
+        sizesXY[1]
+      );
+    }
+    if (draggable.id == 'all-cases-all-countries') {
+      createMapChart(
+        allCountries,
+        fieldsToUseInChart.TOTAL_CONFIRMED,
         sizesXY[0],
         sizesXY[1]
       );
@@ -244,6 +249,12 @@ export const getStoredCharts = () => {
       if (chart.type === 'donut') {
         createDonutChart(data, chart.field, sizes.x, sizes.y, null, true);
       }
+      if (chart.type === 'line') {
+        createLineChart(dataCountry, chart.field, sizes.x, sizes.y, null, true);
+      }
+      if (chart.type === 'map') {
+        createMapChart(data, chart.field, sizes.x, sizes.y, null, true);
+      }
     });
   }
 };
@@ -293,5 +304,10 @@ const decideChartAndCreate = (
     createChart(allCountries, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('donut')) {
     createDonutChart(allCountries, field, width, height, svg);
+  } else if (item.children[0].children[0].classList.contains('line')) {
+    createLineChart(dataCountry, field, width, height, svg);
+  } else if (item.children[0].children[0].classList.contains('map')) {
+    // createMapChart(allCountries, field, 1000, 450, svg);
+    createMapChart(allCountries, field, width, height, svg);
   }
 };

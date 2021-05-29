@@ -1,19 +1,35 @@
 import { addDraggingEvents } from './scripts/dragging.js';
 
 const fetchData = async () => {
-  const rawData = await fetch('https://api.covid19api.com/summary');
+  const rawDataAPI1 = await fetch('https://api.covid19api.com/summary');
+  const dataAPI1 = await rawDataAPI1.json();
+  console.log(dataAPI1);
 
-  const data = await rawData.json();
-  console.log(data);
+  const dataPortugal = await fetchDataForCountry('portugal');
 
-  const countries = data.Countries;
-  addDraggingEvents(countries);
+  const countries = dataAPI1.Countries;
+  addDraggingEvents(countries, dataPortugal);
+};
+
+export const fetchDataForCountry = async (country) => {
+  const rawDt = await fetch(
+    `https://api.covid19api.com/total/dayone/country/${country}`
+  );
+  const data = await rawDt.json();
+  return data;
 };
 
 fetchData();
 
-//TODO: Remove button
+// async function execute() {
+//   while (true) {
+//     await new Promise((resolve) => setTimeout(resolve, 500));
+//     fetchData();
+//   }
+// }
+// execute();
+
 //TODO: more different charts
 //TODO: Refresh data in a period of time
-//TODO: Add an api with four more charts
+//TODO: four more charts
 //TODO: Styles (don't forget collapse sidenav)

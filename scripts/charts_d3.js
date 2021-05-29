@@ -1,4 +1,4 @@
-import { getStoredCharts, resizeAll } from './dragging.js';
+import { fetchDataForCountry } from '../script.js';
 //D3
 export const createChart = (
   rawCountries,
@@ -419,5 +419,266 @@ const getFilteredCountries = (raw, type) => {
         c.Country === 'United States of America' ||
         c.Country === 'Spain'
     );
+  }
+};
+
+export const createLineChart = (
+  allDataCountry,
+  fieldReceived,
+  width,
+  height,
+  svg,
+  local
+) => {
+  let fieldToUse;
+  if (fieldReceived) fieldToUse = fieldReceived;
+
+  let content;
+  if (svg) {
+    fieldToUse = svg.classList[0];
+    content = svg.parentNode;
+    svg.remove();
+  }
+
+  if (!svg && !local) saveToLocalStorage({ field: fieldToUse, type: 'line' });
+
+  const MARGINS = { top: 20, bottom: 20, right: 20, left: 60 };
+  const CHART_WIDTH = width - MARGINS.left - MARGINS.right;
+  const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
+
+  const AUGMENTED_SCALE = 1000000;
+
+  let svgID;
+  if (!svg) {
+    svgID = createSVG(
+      CHART_WIDTH + MARGINS.left + MARGINS.right,
+      CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
+      fieldToUse,
+      'line'
+    );
+  } else {
+    svgID = createSVGWidthContent(content, fieldToUse, 'line');
+  }
+
+  let data = [];
+  const date = new Date(new Date().getTime() - 86400000 * 5);
+  const filteredData = allDataCountry.filter((ct) => new Date(ct.Date) > date);
+  const simplifiedArr = filteredData.map((c) => {
+    const newDate = new Date(c.Date);
+    const formattedDate = `${newDate.getDay()}/${newDate.getMonth()}/${newDate.getFullYear()}`;
+    return { date: formattedDate, cases: c.Confirmed };
+  });
+  simplifiedArr.forEach((e) => data.push(e));
+
+  let chart = d3
+    .select(`#${svgID}`)
+    .attr('width', CHART_WIDTH + MARGINS.left + MARGINS.right)
+    .attr('height', CHART_HEIGHT + MARGINS.top + MARGINS.bottom);
+
+  let mainGraph = chart
+    .append('g')
+    .attr('transform', 'translate(' + MARGINS.left + ',' + MARGINS.top + ')');
+
+  let categoriesNames = data.map((d) => d.date);
+  let xScale = d3.scalePoint().domain(categoriesNames).range([0, CHART_WIDTH]);
+  var yScale = d3
+    .scaleLinear()
+    .range([CHART_HEIGHT, 0])
+    .domain([
+      // 0,
+      d3.min(data, (data) => data.cases),
+      d3.max(data, (data) => data.cases),
+    ]);
+
+  mainGraph
+    .append('g')
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
+    .call(d3.axisBottom(xScale));
+
+  mainGraph.append('g').attr('class', 'y axis').call(d3.axisLeft(yScale));
+
+  var line = d3
+    .line()
+    .x(function (d) {
+      return xScale(d.date);
+    }) // set the x value
+    .y(function (d) {
+      return yScale(d.cases);
+    }) // set the y value
+    .curve(d3.curveMonotoneX); // apply smoothing to the line
+
+  mainGraph
+    .append('path')
+    .datum(data)
+    .attr('d', line)
+    .attr('fill', 'none')
+    .attr('stroke', 'steelblue')
+    .attr('stroke-width', 1.5); // generate line
+};
+
+export const createMapChart = (
+  allCountries,
+  fieldReceived,
+  width,
+  height,
+  svG,
+  local
+) => {
+  let fieldToUse;
+  if (fieldReceived) fieldToUse = fieldReceived;
+
+  let content;
+  if (svG) {
+    fieldToUse = svG.classList[0];
+    content = svG.parentNode;
+    svG.remove();
+  }
+
+  if (!svG && !local) saveToLocalStorage({ field: fieldToUse, type: 'map' });
+
+  const MARGINS = { top: 10, bottom: 10, right: 60, left: 45 };
+  const CHART_WIDTH = width - MARGINS.left - MARGINS.right;
+  const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
+
+  let svgID;
+  if (!svG) {
+    svgID = createSVG(
+      CHART_WIDTH + MARGINS.left + MARGINS.right,
+      CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
+      fieldToUse,
+      'map'
+    );
+  } else {
+    svgID = createSVGWidthContent(content, fieldToUse, 'map');
+  }
+
+  var svg = d3
+    .select(`#${svgID}`)
+    // .attr('id', 'SVG_' + id_area)
+    .attr('width', CHART_WIDTH + MARGINS.left + MARGINS.right)
+    .attr('height', CHART_HEIGHT + MARGINS.top + MARGINS.bottom);
+
+  var color = d3
+    .scaleThreshold()
+    .domain([
+      0, 10000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000,
+      500000000, 1500000000,
+    ])
+    .range([
+      'rgb(247,251,255)',
+      'rgb(222,235,247)',
+      'rgb(198,219,239)',
+      'rgb(158,202,225)',
+      'rgb(107,174,214)',
+      'rgb(66,146,198)',
+      'rgb(33,113,181)',
+      'rgb(8,81,156)',
+      'rgb(8,48,107)',
+      'rgb(3,19,43)',
+      'rgb(0,0,0)',
+    ]);
+
+  // Data and color scale
+  var projection = d3
+    .geoMercator()
+    .scale(100)
+    .translate([width / 2, height / 1.5]);
+
+  var path = d3.geoPath().projection(projection);
+
+  $.ajax({
+    type: 'GET',
+    url: 'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson',
+    success: function (data) {
+      d3.json = data;
+
+      $.ajax({
+        type: 'GET',
+        url: 'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world_population.csv',
+        success: function (data) {
+          d3.csv = data;
+
+          ready(d3.json, d3.csv);
+        },
+      });
+    },
+  });
+
+  function ready(data, population) {
+    data = JSON.parse(data);
+
+    data.features.forEach((f) => {
+      allCountries.forEach((c) => {
+        if (c.Country === f.properties.name) {
+          f.cases = c.TotalConfirmed;
+        }
+      });
+    });
+
+    var tooltip = d3
+      .select('.main')
+      .append('div')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('width', '120px')
+      .style('background-color', 'black')
+      .style('color', '#fff')
+      .style('text-align', 'center')
+      .style('border-radius', '6px')
+      .style('padding', '5px 0')
+      .style('z-index', '1000')
+      .text('No information');
+
+    svg
+      .append('g')
+      .attr('class', 'countries')
+      .selectAll('path')
+      .data(data.features)
+      .enter()
+      .append('path')
+      .attr('d', path)
+      .style('fill', function (d) {
+        if (d.cases !== undefined) {
+          return color(d.cases);
+        } else {
+          return color(0);
+        }
+      })
+      .style('stroke', 'white')
+      .style('stroke-width', 1.5)
+      .style('opacity', 0.8)
+      .style('stroke', 'white')
+      .style('stroke-width', 0.3)
+      .on('mouseover', function (d) {
+        tooltip.style('visibility', 'visible');
+        if (d.toElement.__data__.cases === undefined) {
+          tooltip.text(
+            `No information about ${d.toElement.__data__.properties.name}`
+          );
+        } else {
+          tooltip.text(
+            `${d.toElement.__data__.properties.name} - ${d.toElement.__data__.cases} cases`
+          );
+        }
+        d3.select(this)
+          .style('opacity', 1)
+          .style('stroke', 'white')
+          .style('stroke-width', 3);
+      })
+      .on('mousemove', function (d) {
+        return tooltip
+          .style('top', d.screenY + 'px')
+          .style('left', d.screenX + 'px');
+      })
+      .on('mouseout', function (d) {
+        tooltip.style('visibility', 'hidden');
+        tooltip.text('');
+
+        d3.select(this)
+          .style('opacity', 0.8)
+          .style('stroke', 'white')
+          .style('stroke-width', 0.3);
+      });
   }
 };
