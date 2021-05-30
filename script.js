@@ -34,5 +34,5 @@ fetchData();
 // }
 // execute();
 
-//TODO: 2 different charts
+//TODO: 1 different charts
 //TODO: Refresh data in a period of time

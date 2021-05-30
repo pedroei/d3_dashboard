@@ -688,3 +688,179 @@ export const createBubbleChart = (
     .on('mousemove', moveTooltip)
     .on('mouseleave', hideTooltip);
 };
+
+export const createCircularBarPlotChart = (
+  allCountries,
+  fieldReceived,
+  width,
+  height,
+  svG,
+  local
+) => {
+  let fieldToUse;
+  if (fieldReceived) fieldToUse = fieldReceived;
+
+  let content;
+  if (svG) {
+    fieldToUse = svG.classList[0];
+    content = svG.parentNode;
+    svG.remove();
+  }
+
+  if (!svG && !local)
+    saveToLocalStorage({ field: fieldToUse, type: 'circular' });
+
+  const MARGINS = { top: 100, bottom: 0, right: 0, left: 0 };
+  const CHART_WIDTH = width - MARGINS.left - MARGINS.right;
+  const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
+  const innerRadius = 90;
+  const outerRadius = Math.min(CHART_WIDTH, CHART_HEIGHT) / 2; // the outerRadius goes from the middle of the SVG area to the border
+
+  let svgID;
+  if (!svG) {
+    svgID = createSVG(
+      CHART_WIDTH + MARGINS.left + MARGINS.right,
+      CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
+      fieldToUse,
+      'circular'
+    );
+  } else {
+    svgID = createSVGWidthContent(content, fieldToUse, 'circular');
+  }
+
+  // append the svg object
+  var svg = d3
+    .select(`#${svgID}`)
+    .attr('width', CHART_WIDTH + MARGINS.left + MARGINS.right)
+    .attr('height', CHART_HEIGHT + MARGINS.top + MARGINS.bottom)
+    .append('g')
+    .attr(
+      'transform',
+      'translate(' +
+        (CHART_WIDTH / 2 + MARGINS.left) +
+        ',' +
+        (CHART_HEIGHT / 2 + MARGINS.top) +
+        ')'
+    );
+
+  const data = allCountries
+    .sort((a, b) => {
+      if (a.TotalRecovered < b.TotalRecovered) {
+        return 1;
+      }
+      return -1;
+    })
+    .slice(0, 50); // first 50 countries with most recovers
+
+  const tooltip = d3
+    .select('.main')
+    .append('div')
+    .style('position', 'absolute')
+    .style('visibility', 'hidden')
+    .style('width', '120px')
+    .style('background-color', 'black')
+    .style('color', '#fff')
+    .style('text-align', 'center')
+    .style('border-radius', '6px')
+    .style('padding', '5px 0')
+    .style('z-index', '1000')
+    .text('No information');
+
+  // Scales
+  var x = d3
+    .scaleBand()
+    .range([0, 2 * Math.PI]) // X axis goes from 0 to 2pi = all around the circle. If I stop at 1Pi, it will be around a half circle
+    .align(0) // This does nothing
+    .domain(
+      data.map(function (d) {
+        return d.Country;
+      })
+    ); // The domain of the X axis is the list of states.
+
+  var y = d3
+    .scaleRadial()
+    .range([innerRadius, outerRadius]) // Domain will be define later.
+    .domain([0, 15000000]); // Domain of Y is from 0 to the max seen in the data
+
+  // Add the bars
+  svg
+    .append('g')
+    .selectAll('path')
+    .data(data)
+    .enter()
+    .append('path')
+    .attr('fill', '#69b3a2')
+    .attr(
+      'd',
+      d3
+        .arc() // imagine your doing a part of a donut plot
+        .innerRadius(innerRadius)
+        .outerRadius(function (d) {
+          return y(d['TotalRecovered']);
+        })
+        .startAngle(function (d) {
+          return x(d.Country);
+        })
+        .endAngle(function (d) {
+          return x(d.Country) + x.bandwidth();
+        })
+        .padAngle(0.01)
+        .padRadius(innerRadius)
+    );
+
+  // Add the labels
+  svg
+    .append('g')
+    .selectAll('g')
+    .data(data)
+    .enter()
+    .append('g')
+    .attr('text-anchor', function (d) {
+      return (x(d.Country) + x.bandwidth() / 2 + Math.PI) % (2 * Math.PI) <
+        Math.PI
+        ? 'end'
+        : 'start';
+    })
+    .attr('transform', function (d) {
+      return (
+        'rotate(' +
+        (((x(d.Country) + x.bandwidth() / 2) * 180) / Math.PI - 90) +
+        ')' +
+        'translate(' +
+        (y(d['TotalRecovered']) + 10) +
+        ',0)'
+      );
+    })
+    .append('text')
+    .text(function (d) {
+      return d.Country;
+    })
+    .attr('transform', function (d) {
+      return (x(d.Country) + x.bandwidth() / 2 + Math.PI) % (2 * Math.PI) <
+        Math.PI
+        ? 'rotate(180)'
+        : 'rotate(0)';
+    })
+    .style('font-size', '11px')
+    .attr('alignment-baseline', 'middle')
+    .on('mouseover', function (d) {
+      tooltip.style('visibility', 'visible');
+      tooltip.html(
+        `${d.toElement.__data__.Country}<br/> 
+        Total: ${d.toElement.__data__.TotalConfirmed}<br/> 
+        Recovered: ${d.toElement.__data__.TotalRecovered}`
+      );
+      d3.select(this).style('opacity', 0.8);
+    })
+    .on('mousemove', function (d) {
+      return tooltip
+        .style('top', d.screenY + 'px')
+        .style('left', d.screenX + 'px');
+    })
+    .on('mouseout', function (d) {
+      tooltip.style('visibility', 'hidden');
+      tooltip.text('');
+
+      d3.select(this).style('opacity', 1);
+    });
+};

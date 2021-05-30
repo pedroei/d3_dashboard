@@ -4,6 +4,7 @@ import {
   createLineChart,
   createMapChart,
   createBubbleChart,
+  createCircularBarPlotChart,
 } from './charts.js';
 
 const fieldsToUseInChart = {
@@ -51,7 +52,10 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
       // if (items.length > 1) {
       items.forEach((item) => {
         const svg = item.children[0].children[0];
-        if (svg.classList.contains('map')) {
+        if (
+          svg.classList.contains('map') ||
+          svg.classList.contains('circular')
+        ) {
           item.style.width = mapSizes.width + 'px';
           item.style.height = mapSizes.height + 'px';
         } else {
@@ -67,7 +71,10 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     if (items.length > 3) {
       items.forEach((item) => {
         const svg = item.children[0].children[0];
-        if (svg.classList.contains('map')) {
+        if (
+          svg.classList.contains('map') ||
+          svg.classList.contains('circular')
+        ) {
           item.style.width = mapSizes.width + 'px';
           item.style.height = mapSizes.height + 'px';
         } else {
@@ -153,6 +160,14 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
         sizesXY[1]
       );
     }
+    if (draggable.id == 'top-50-countries.recovers') {
+      createCircularBarPlotChart(
+        allCountries,
+        fieldsToUseInChart.TOTAL_RECOVERED,
+        mapSizes.width,
+        mapSizes.height
+      );
+    }
   });
 
   getStoredCharts();
@@ -168,7 +183,10 @@ window.addEventListener(
       const items = document.querySelectorAll('.item');
       if (items.length <= 1) {
         items.forEach((item) => {
-          if (svg.classList.contains('map')) {
+          if (
+            svg.classList.contains('map') ||
+            svg.classList.contains('circular')
+          ) {
             item.style.width = mapSizes.width + 'px';
             item.style.height = mapSizes.height + 'px';
           } else {
@@ -189,7 +207,10 @@ window.addEventListener(
       const items = document.querySelectorAll('.item');
       items.forEach((item) => {
         const svg = item.children[0].children[0];
-        if (svg.classList.contains('map')) {
+        if (
+          svg.classList.contains('map') ||
+          svg.classList.contains('circular')
+        ) {
           item.style.width = mapSizes.width + 'px';
           item.style.height = mapSizes.height + 'px';
         } else {
@@ -207,7 +228,10 @@ window.addEventListener(
       const items = document.querySelectorAll('.item');
       items.forEach((item) => {
         const svg = item.children[0].children[0];
-        if (svg.classList.contains('map')) {
+        if (
+          svg.classList.contains('map') ||
+          svg.classList.contains('circular')
+        ) {
           item.style.width = mapSizes.width + 'px';
           item.style.height = mapSizes.height + 'px';
         } else {
@@ -277,6 +301,16 @@ export const getStoredCharts = () => {
       if (chart.type === 'bubble') {
         createBubbleChart(data, chart.field, sizes.x, sizes.y, null, true);
       }
+      if (chart.type === 'circular') {
+        createCircularBarPlotChart(
+          data,
+          chart.field,
+          mapSizes.width,
+          mapSizes.height,
+          null,
+          true
+        );
+      }
     });
   }
 };
@@ -300,5 +334,13 @@ const decideChartAndCreate = (
     createMapChart(allCountries, field, mapSizes.width, mapSizes.height, svg);
   } else if (item.children[0].children[0].classList.contains('bubble')) {
     createBubbleChart(allCountries, field, width, height, svg);
+  } else if (item.children[0].children[0].classList.contains('circular')) {
+    createCircularBarPlotChart(
+      allCountries,
+      field,
+      mapSizes.width,
+      mapSizes.height,
+      svg
+    );
   }
 };
