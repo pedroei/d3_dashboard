@@ -621,7 +621,8 @@ export const createBubbleChart = (
   svg
     .append('g')
     .attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
-    .call(d3.axisBottom(x));
+    .call(d3.axisBottom(x))
+    .style('font-size', '8px');
 
   // Add Y axis
   var y = d3.scaleLinear().domain([0, 25000]).range([CHART_HEIGHT, 0]);
@@ -638,7 +639,6 @@ export const createBubbleChart = (
     .append('div')
     .style('position', 'absolute')
     .style('visibility', 'hidden')
-    // .style('width', '120px')
     .style('background-color', 'black')
     .style('color', '#fff')
     .style('text-align', 'center')
