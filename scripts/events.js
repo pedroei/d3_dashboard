@@ -25,6 +25,11 @@ let sizesXY = [1000, 600];
 
 const mapSizes = { width: 920, height: 450 };
 
+export const updateData = (newCountries, newDataPortugal) => {
+  data = newCountries;
+  dataCountry = newDataPortugal;
+};
+
 export const addDraggingEvents = (allCountries, dataPortugal) => {
   data = allCountries;
   dataCountry = dataPortugal;
@@ -63,7 +68,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
           item.style.height = '300px';
         }
 
-        decideChartAndCreate(item, allCountries, null, 440, 300, svg, null);
+        decideChartAndCreate(item, data, null, 440, 300, svg, null);
       });
       grid.refreshItems();
       sizesXY = [440, 300];
@@ -82,7 +87,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
           item.style.height = '200px';
         }
 
-        decideChartAndCreate(item, allCountries, null, 280, 200, svg, null);
+        decideChartAndCreate(item, data, null, 280, 200, svg, null);
       });
       grid.refreshItems();
       sizesXY = [280, 200];
@@ -90,7 +95,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
 
     if (draggable.id == 'deaths-country') {
       createDonutChart(
-        allCountries,
+        data,
         fieldsToUseInChart.TOTAL_DEATHS,
         sizesXY[0],
         sizesXY[1]
@@ -98,7 +103,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'cases-country') {
       createChart(
-        allCountries,
+        data,
         fieldsToUseInChart.TOTAL_CONFIRMED,
         sizesXY[0],
         sizesXY[1]
@@ -106,23 +111,18 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'recovered-country') {
       createChart(
-        allCountries,
+        data,
         fieldsToUseInChart.TOTAL_RECOVERED,
         sizesXY[0],
         sizesXY[1]
       );
     }
     if (draggable.id == 'new-deaths-country') {
-      createChart(
-        allCountries,
-        fieldsToUseInChart.NEW_DEATHS,
-        sizesXY[0],
-        sizesXY[1]
-      );
+      createChart(data, fieldsToUseInChart.NEW_DEATHS, sizesXY[0], sizesXY[1]);
     }
     if (draggable.id == 'new-cases-country') {
       createChart(
-        allCountries,
+        data,
         fieldsToUseInChart.NEW_CONFIRMED,
         sizesXY[0],
         sizesXY[1]
@@ -130,7 +130,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'new-recovered-country') {
       createChart(
-        allCountries,
+        data,
         fieldsToUseInChart.NEW_RECOVERED,
         sizesXY[0],
         sizesXY[1]
@@ -138,7 +138,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'cases-this-week') {
       createLineChart(
-        dataPortugal,
+        dataCountry,
         fieldsToUseInChart.TOTAL_CONFIRMED,
         sizesXY[0],
         sizesXY[1]
@@ -146,7 +146,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'all-cases-all-countries') {
       createMapChart(
-        allCountries,
+        data,
         fieldsToUseInChart.TOTAL_CONFIRMED,
         mapSizes.width,
         mapSizes.height
@@ -154,7 +154,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'new-cases-all-countries') {
       createBubbleChart(
-        allCountries,
+        data,
         fieldsToUseInChart.NEW_DEATHS,
         sizesXY[0],
         sizesXY[1]
@@ -162,7 +162,7 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
     }
     if (draggable.id == 'top-50-countries.recovers') {
       createCircularBarPlotChart(
-        allCountries,
+        data,
         fieldsToUseInChart.TOTAL_RECOVERED,
         mapSizes.width,
         mapSizes.height
@@ -196,7 +196,7 @@ window.addEventListener(
 
           const svg = item.children[0].children[0];
 
-          decideChartAndCreate(item, allCountries, null, 1000, 600, svg, null);
+          decideChartAndCreate(item, data, null, 1000, 600, svg, null);
         });
         grid.refreshItems();
         sizesXY = [1000, 600];
@@ -218,7 +218,7 @@ window.addEventListener(
           item.style.height = '300px';
         }
 
-        decideChartAndCreate(item, allCountries, null, 440, 300, svg, null);
+        decideChartAndCreate(item, data, null, 440, 300, svg, null);
       });
       grid.refreshItems();
       sizesXY = [440, 300];
@@ -239,7 +239,7 @@ window.addEventListener(
           item.style.height = '200px';
         }
 
-        decideChartAndCreate(item, allCountries, null, 280, 200, svg, null);
+        decideChartAndCreate(item, data, null, 280, 200, svg, null);
       });
       grid.refreshItems();
       sizesXY = [280, 200];
@@ -315,28 +315,20 @@ export const getStoredCharts = () => {
   }
 };
 
-const decideChartAndCreate = (
-  item,
-  allCountries,
-  field,
-  width,
-  height,
-  svg,
-  local
-) => {
+const decideChartAndCreate = (item, data, field, width, height, svg, local) => {
   if (item.children[0].children[0].classList.contains('bar')) {
-    createChart(allCountries, field, width, height, svg);
+    createChart(data, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('donut')) {
-    createDonutChart(allCountries, field, width, height, svg);
+    createDonutChart(data, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('line')) {
     createLineChart(dataCountry, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('map')) {
-    createMapChart(allCountries, field, mapSizes.width, mapSizes.height, svg);
+    createMapChart(data, field, mapSizes.width, mapSizes.height, svg);
   } else if (item.children[0].children[0].classList.contains('bubble')) {
-    createBubbleChart(allCountries, field, width, height, svg);
+    createBubbleChart(data, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('circular')) {
     createCircularBarPlotChart(
-      allCountries,
+      data,
       field,
       mapSizes.width,
       mapSizes.height,

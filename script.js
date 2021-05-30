@@ -1,6 +1,8 @@
-import { addDraggingEvents } from './scripts/events.js';
+import { addDraggingEvents, updateData } from './scripts/events.js';
 
 const elTotalCases = document.querySelector('#total-global');
+
+let firstTime = true;
 
 const fetchData = async () => {
   const rawDataAPI1 = await fetch('https://api.covid19api.com/summary');
@@ -13,7 +15,15 @@ const fetchData = async () => {
     'Total confirmed global: ' + dataAPI1.Global.TotalConfirmed;
 
   const countries = dataAPI1.Countries;
-  addDraggingEvents(countries, dataPortugal);
+
+  if (firstTime) {
+    addDraggingEvents(countries, dataPortugal);
+  } else {
+    updateData(countries, dataPortugal);
+  }
+  firstTime = false;
+
+  setTimeout(() => fetchData(), 10000);
 };
 
 export const fetchDataForCountry = async (country) => {
@@ -25,14 +35,3 @@ export const fetchDataForCountry = async (country) => {
 };
 
 fetchData();
-
-// async function execute() {
-//   while (true) {
-//     await new Promise((resolve) => setTimeout(resolve, 500));
-//     fetchData();
-//   }
-// }
-// execute();
-
-//TODO: 1 different charts
-//TODO: Refresh data in a period of time

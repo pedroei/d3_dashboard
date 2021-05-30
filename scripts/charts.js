@@ -614,7 +614,6 @@ export const createBubbleChart = (
     .attr('transform', 'translate(' + MARGINS.left + ',' + MARGINS.top + ')');
 
   var data = allCountries;
-  console.log(data);
 
   // Add X axis
   var x = d3.scaleLinear().domain([0, 700]).range([0, CHART_WIDTH]);
@@ -648,7 +647,6 @@ export const createBubbleChart = (
 
   var showTooltip = function (d) {
     tooltip.style('visibility', 'visible');
-    console.log(d);
     tooltip.html(`Country: ${d.toElement.__data__.Country}<br/>
             New deaths: ${d.toElement.__data__.NewDeaths}<br/>
             New recovered: ${d.toElement.__data__.NewRecovered}<br/>
