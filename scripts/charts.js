@@ -1,4 +1,10 @@
-import { fetchDataForCountry } from '../script.js';
+import {
+  createSVG,
+  chooseField,
+  createSVGWidthContent,
+  saveToLocalStorage,
+  getFilteredCountries,
+} from './common.js';
 //D3
 export const createChart = (
   rawCountries,
@@ -84,101 +90,6 @@ export const createChart = (
     .attr('y', (data) => y(chooseField(data, fieldToUse)) - 20)
     .attr('text-anchor', 'middle')
     .classed('label', true);
-};
-
-const createSVG = (WIDTH, HEIGHT, fieldReceived, type) => {
-  //svg is in a different namespace
-  const svgDiv = document.createElement('div');
-  const svgDivContent = document.createElement('div');
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  const svgID = generateID();
-
-  const deleteBtn = document.createElement('i');
-  deleteBtn.classList.add('fas');
-  deleteBtn.classList.add('fa-times');
-  deleteBtn.classList.add('fa-sm');
-
-  svgDiv.style.width = `${WIDTH}px`;
-  svgDiv.style.height = `${HEIGHT}px`;
-
-  svgDiv.classList.add('item');
-  svgDivContent.classList.add('item-content');
-  svg.setAttribute('id', svgID);
-  svg.classList.add(fieldReceived);
-  svg.classList.add(type);
-
-  svgDivContent.append(svg);
-  svgDiv.append(svgDivContent);
-  svgDiv.append(deleteBtn);
-  grid.add(svgDiv);
-
-  addRemoveEvent(svgDiv, fieldReceived, type, deleteBtn);
-  return svgID;
-};
-
-const generateID = () => {
-  return 'axxxxxxxxxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = (Math.random() * 16) | 0,
-      v = c == 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-};
-
-const chooseField = (country, fieldReceived) => {
-  if (fieldReceived === 'NewConfirmed') return country.NewConfirmed;
-  if (fieldReceived === 'NewDeaths') return country.NewDeaths;
-  if (fieldReceived === 'NewRecovered') return country.NewRecovered;
-  if (fieldReceived === 'TotalConfirmed') return country.TotalConfirmed;
-  if (fieldReceived === 'TotalDeaths') return country.TotalDeaths;
-  if (fieldReceived === 'TotalRecovered') return country.TotalRecovered;
-};
-
-const addRemoveEvent = (itemEl, field, type, btn) => {
-  btn.addEventListener('click', (e) => {
-    const item = grid.getItems(itemEl)[0];
-
-    grid.remove(grid.getItems(itemEl), { removeElements: true });
-    grid.refreshItems();
-    grid.layout();
-
-    removeFromLocalStorage({ field: field, type: type });
-  });
-};
-
-const createSVGWidthContent = (content, fieldReceived, type) => {
-  const svgDivContent = content;
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  const svgID = generateID();
-
-  svg.setAttribute('id', svgID);
-  svg.classList.add(fieldReceived);
-  svg.classList.add(type);
-
-  svgDivContent.append(svg);
-  return svgID;
-};
-
-const saveToLocalStorage = (chartObject) => {
-  let storedCharts;
-
-  if (localStorage.getItem('charts')) {
-    storedCharts = JSON.parse(localStorage.getItem('charts'));
-  } else {
-    storedCharts = [];
-  }
-  storedCharts.push(chartObject);
-  window.localStorage.setItem('charts', JSON.stringify(storedCharts));
-};
-
-const removeFromLocalStorage = (itemToRemove) => {
-  let storedCharts = JSON.parse(localStorage.getItem('charts'));
-
-  const foundItem = storedCharts.find((c) => c.field === itemToRemove.field);
-  const itemIndex = storedCharts.indexOf(foundItem);
-  storedCharts.splice(itemIndex, 1);
-
-  window.localStorage.setItem('charts', JSON.stringify(storedCharts));
-  // resizeAll();
 };
 
 export const createDonutChart = (
@@ -395,30 +306,6 @@ export const createDonutChart = (
     el._oldValue = interpolator(0);
 
     return interpolator;
-  }
-};
-
-const getFilteredCountries = (raw, type) => {
-  if (type === 'bar') {
-    return raw.filter(
-      (c) =>
-        c.Country === 'Portugal' ||
-        c.Country === 'United Kingdom' ||
-        c.Country === 'Germany' ||
-        c.Country === 'United States of America' ||
-        c.Country === 'Spain' ||
-        c.Country === 'India' ||
-        c.Country === 'Brazil'
-    );
-  } else if (type === 'donut') {
-    return raw.filter(
-      (c) =>
-        c.Country === 'Portugal' ||
-        c.Country === 'United Kingdom' ||
-        c.Country === 'Germany' ||
-        c.Country === 'United States of America' ||
-        c.Country === 'Spain'
-    );
   }
 };
 
@@ -681,4 +568,123 @@ export const createMapChart = (
           .style('stroke-width', 0.3);
       });
   }
+};
+
+export const createBubbleChart = (
+  allCountries,
+  fieldReceived,
+  width,
+  height,
+  svG,
+  local
+) => {
+  let fieldToUse;
+  if (fieldReceived) fieldToUse = fieldReceived;
+
+  let content;
+  if (svG) {
+    fieldToUse = svG.classList[0];
+    content = svG.parentNode;
+    svG.remove();
+  }
+
+  if (!svG && !local) saveToLocalStorage({ field: fieldToUse, type: 'bubble' });
+
+  const MARGINS = { top: 10, bottom: 20, right: 30, left: 50 };
+  const CHART_WIDTH = width - MARGINS.left - MARGINS.right;
+  const CHART_HEIGHT = height - MARGINS.top - MARGINS.bottom;
+
+  let svgID;
+  if (!svG) {
+    svgID = createSVG(
+      CHART_WIDTH + MARGINS.left + MARGINS.right,
+      CHART_HEIGHT + MARGINS.top + MARGINS.bottom,
+      fieldToUse,
+      'bubble'
+    );
+  } else {
+    svgID = createSVGWidthContent(content, fieldToUse, 'bubble');
+  }
+
+  var svg = d3
+    .select(`#${svgID}`)
+    .attr('width', CHART_WIDTH + MARGINS.left + MARGINS.right)
+    .attr('height', CHART_HEIGHT + MARGINS.top + MARGINS.bottom)
+    .append('g')
+    .attr('transform', 'translate(' + MARGINS.left + ',' + MARGINS.top + ')');
+
+  var data = allCountries;
+  console.log(data);
+
+  // Add X axis
+  var x = d3.scaleLinear().domain([0, 700]).range([0, CHART_WIDTH]);
+  svg
+    .append('g')
+    .attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
+    .call(d3.axisBottom(x));
+
+  // Add Y axis
+  var y = d3.scaleLinear().domain([0, 25000]).range([CHART_HEIGHT, 0]);
+  svg.append('g').call(d3.axisLeft(y));
+
+  // Add a scale for bubble size
+  var z = d3.scaleLinear().domain([200000, 90000000]).range([4, 40]);
+
+  // Add a scale for bubble color
+  var myColor = d3.scaleOrdinal().domain([0, 10000]).range(d3.schemeSet2);
+
+  var tooltip = d3
+    .select('.main')
+    .append('div')
+    .style('position', 'absolute')
+    .style('visibility', 'hidden')
+    // .style('width', '120px')
+    .style('background-color', 'black')
+    .style('color', '#fff')
+    .style('text-align', 'center')
+    .style('border-radius', '6px')
+    .style('padding', '5px 0')
+    .style('z-index', '1000');
+
+  var showTooltip = function (d) {
+    tooltip.style('visibility', 'visible');
+    console.log(d);
+    tooltip.html(`Country: ${d.toElement.__data__.Country}<br/>
+            New deaths: ${d.toElement.__data__.NewDeaths}<br/>
+            New recovered: ${d.toElement.__data__.NewRecovered}<br/>
+            New confirmed: ${d.toElement.__data__.NewConfirmed}`);
+  };
+  var moveTooltip = function (d) {
+    return tooltip
+      .style('top', d.screenY / 2 + 'px')
+      .style('left', d.screenX + 'px');
+  };
+  var hideTooltip = function (d) {
+    tooltip.style('visibility', 'hidden');
+    tooltip.text('');
+  };
+
+  // Add dots
+  svg
+    .append('g')
+    .selectAll('dot')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('class', 'bubbles')
+    .attr('cx', function (d) {
+      return x(d.NewDeaths);
+    })
+    .attr('cy', function (d) {
+      return y(d.NewRecovered);
+    })
+    .attr('r', function (d) {
+      return z(d.NewConfirmed);
+    })
+    .style('fill', function (d) {
+      return myColor(d.NewDeaths);
+    })
+    .on('mouseover', showTooltip)
+    .on('mousemove', moveTooltip)
+    .on('mouseleave', hideTooltip);
 };

@@ -17,12 +17,17 @@ body {
   padding-top: 20px;
 }
 
-.custom-sidenav .sidenav-item {
+.custom-sidenav .sidenav-item,
+.sidenav-item-info {
   padding: 6px 8px 6px 16px;
   text-decoration: none;
   font-size: 18px;
   color: #818181;
   display: block;
+}
+
+.sidenav-item-info {
+  color: #7a7a7a;
 }
 
 .custom-sidenav .sidenav-title {
@@ -116,6 +121,14 @@ body {
   color: red;
   top: 10px;
   right: -25px;
+}
+
+.bubbles {
+  stroke-width: 2px;
+  stroke: white;
+}
+.bubbles:hover {
+  stroke: black;
 }
 
 @media screen and (max-width: 950px) {

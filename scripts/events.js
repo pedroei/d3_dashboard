@@ -3,7 +3,8 @@ import {
   createDonutChart,
   createLineChart,
   createMapChart,
-} from './charts_d3.js';
+  createBubbleChart,
+} from './charts.js';
 
 const fieldsToUseInChart = {
   NEW_CONFIRMED: 'NewConfirmed',
@@ -20,6 +21,8 @@ const container = document.querySelector('.main');
 let data;
 let dataCountry;
 let sizesXY = [1000, 600];
+
+const mapSizes = { width: 920, height: 450 };
 
 export const addDraggingEvents = (allCountries, dataPortugal) => {
   data = allCountries;
@@ -49,15 +52,14 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
       items.forEach((item) => {
         const svg = item.children[0].children[0];
         if (svg.classList.contains('map')) {
-          item.style.width = '920px';
-          item.style.height = '450px';
+          item.style.width = mapSizes.width + 'px';
+          item.style.height = mapSizes.height + 'px';
         } else {
           item.style.width = '440px';
           item.style.height = '300px';
         }
 
         decideChartAndCreate(item, allCountries, null, 440, 300, svg, null);
-        // createChart(allCountries, null, 450, 300, svg);
       });
       grid.refreshItems();
       sizesXY = [440, 300];
@@ -66,15 +68,14 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
       items.forEach((item) => {
         const svg = item.children[0].children[0];
         if (svg.classList.contains('map')) {
-          item.style.width = '920px';
-          item.style.height = '450px';
+          item.style.width = mapSizes.width + 'px';
+          item.style.height = mapSizes.height + 'px';
         } else {
           item.style.width = '280px';
           item.style.height = '200px';
         }
 
         decideChartAndCreate(item, allCountries, null, 280, 200, svg, null);
-        // createChart(allCountries, null, 280, 200, svg);
       });
       grid.refreshItems();
       sizesXY = [280, 200];
@@ -140,8 +141,16 @@ export const addDraggingEvents = (allCountries, dataPortugal) => {
       createMapChart(
         allCountries,
         fieldsToUseInChart.TOTAL_CONFIRMED,
-        920,
-        450
+        mapSizes.width,
+        mapSizes.height
+      );
+    }
+    if (draggable.id == 'new-cases-all-countries') {
+      createBubbleChart(
+        allCountries,
+        fieldsToUseInChart.NEW_DEATHS,
+        sizesXY[0],
+        sizesXY[1]
       );
     }
   });
@@ -159,28 +168,21 @@ window.addEventListener(
       const items = document.querySelectorAll('.item');
       if (items.length <= 1) {
         items.forEach((item) => {
-          item.style.width = '1000px';
-          item.style.height = '600px';
+          if (svg.classList.contains('map')) {
+            item.style.width = mapSizes.width + 'px';
+            item.style.height = mapSizes.height + 'px';
+          } else {
+            item.style.width = '1000px';
+            item.style.height = '600px';
+          }
 
           const svg = item.children[0].children[0];
 
-          createChart(data, null, 1000, 600, svg, false);
+          decideChartAndCreate(item, allCountries, null, 1000, 600, svg, null);
         });
         grid.refreshItems();
         sizesXY = [1000, 600];
       }
-      // if (items.length <= 2) {
-      //   items.forEach((item) => {
-      //     item.style.width = '510px';
-      //     item.style.height = '400px';
-
-      //     const svg = item.children[0].children[0];
-
-      //     createChart(data, null, 510, 400, svg, false);
-      //   });
-      //   grid.refreshItems();
-      //   sizesXY = [510, 400];
-      // }
     }
 
     if (w <= 950) {
@@ -188,8 +190,8 @@ window.addEventListener(
       items.forEach((item) => {
         const svg = item.children[0].children[0];
         if (svg.classList.contains('map')) {
-          item.style.width = '920px';
-          item.style.height = '450px';
+          item.style.width = mapSizes.width + 'px';
+          item.style.height = mapSizes.height + 'px';
         } else {
           item.style.width = '440px';
           item.style.height = '300px';
@@ -206,8 +208,8 @@ window.addEventListener(
       items.forEach((item) => {
         const svg = item.children[0].children[0];
         if (svg.classList.contains('map')) {
-          item.style.width = '920px';
-          item.style.height = '450px';
+          item.style.width = mapSizes.width + 'px';
+          item.style.height = mapSizes.height + 'px';
         } else {
           item.style.width = '280px';
           item.style.height = '200px';
@@ -242,12 +244,6 @@ export const getStoredCharts = () => {
     const storedCharts = JSON.parse(localStorage.getItem('charts'));
     const sizes = { x: 1000, y: 600 };
 
-    // if (storedCharts.length === 2) {
-    //   sizes.x = 510;
-    //   sizes.y = 400;
-    // }
-
-    // if (storedCharts.length >= 3 && storedCharts.length <= 4) {
     if (storedCharts.length >= 2 && storedCharts.length <= 4) {
       sizes.x = 440;
       sizes.y = 300;
@@ -269,42 +265,20 @@ export const getStoredCharts = () => {
         createLineChart(dataCountry, chart.field, sizes.x, sizes.y, null, true);
       }
       if (chart.type === 'map') {
-        createMapChart(data, chart.field, 920, 450, null, true);
+        createMapChart(
+          data,
+          chart.field,
+          mapSizes.width,
+          mapSizes.height,
+          null,
+          true
+        );
+      }
+      if (chart.type === 'bubble') {
+        createBubbleChart(data, chart.field, sizes.x, sizes.y, null, true);
       }
     });
   }
-};
-
-export const resizeAll = () => {
-  const itemsElements = document.querySelectorAll('.item');
-  const sizes = { x: 1000, y: 600 };
-
-  // if (itemsElements.length === 2) {
-  //   sizes.x = 510;
-  //   sizes.y = 400;
-  // }
-
-  if (itemsElements.length >= 2 && itemsElements.length <= 4) {
-    // if (itemsElements.length >= 3 && itemsElements.length <= 4) {
-    sizes.x = 440;
-    sizes.y = 300;
-  }
-
-  if (itemsElements.length > 4) {
-    sizes.x = 280;
-    sizes.y = 200;
-  }
-
-  itemsElements.forEach((itemEl) => {
-    console.log(sizes);
-    itemEl.style.width = `${sizes.x}px`;
-    itemEl.style.height = `${sizes.y}px`;
-
-    const svg = itemEl.children[0].children[0];
-
-    createChart(data, null, sizes.x, sizes.y, svg, false);
-    grid.refreshItems();
-  });
 };
 
 const decideChartAndCreate = (
@@ -323,7 +297,8 @@ const decideChartAndCreate = (
   } else if (item.children[0].children[0].classList.contains('line')) {
     createLineChart(dataCountry, field, width, height, svg);
   } else if (item.children[0].children[0].classList.contains('map')) {
-    // createMapChart(allCountries, field, 1000, 450, svg);
-    createMapChart(allCountries, field, 920, 450, svg);
+    createMapChart(allCountries, field, mapSizes.width, mapSizes.height, svg);
+  } else if (item.children[0].children[0].classList.contains('bubble')) {
+    createBubbleChart(allCountries, field, width, height, svg);
   }
 };

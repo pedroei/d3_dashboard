@@ -1,4 +1,6 @@
-import { addDraggingEvents } from './scripts/dragging.js';
+import { addDraggingEvents } from './scripts/events.js';
+
+const elTotalCases = document.querySelector('#total-global');
 
 const fetchData = async () => {
   const rawDataAPI1 = await fetch('https://api.covid19api.com/summary');
@@ -6,6 +8,9 @@ const fetchData = async () => {
   console.log(dataAPI1);
 
   const dataPortugal = await fetchDataForCountry('portugal');
+
+  elTotalCases.innerHTML =
+    'Total confirmed global: ' + dataAPI1.Global.TotalConfirmed;
 
   const countries = dataAPI1.Countries;
   addDraggingEvents(countries, dataPortugal);
